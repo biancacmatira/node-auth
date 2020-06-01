@@ -12,7 +12,29 @@ router.get("/login", authController.getLogin);
 // @route   POST /login
 // @desc    Authenticate a user
 // @access  Public
-router.post("/login", authController.postLogin);
+router.post(
+  "/login",
+  [
+    check("email")
+      .isEmail()
+      .withMessage("Please enter a valid email")
+      .custom((val) => {
+        return User.findOne({ email: val }).then((user) => {
+          if (!user) {
+            return Promise.reject("User does not exist");
+          }
+        });
+      }),
+    body("password").custom((val, { req }) => {
+      return User.findOne({ email: req.body.email }).then((user) => {
+        if (val !== user.password) {
+          return Promise.reject("Wrong password. Please try again.");
+        }
+      });
+    }),
+  ],
+  authController.postLogin
+);
 
 // @route   POST /logout
 // @desc    Un-authenticate a user

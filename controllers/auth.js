@@ -21,36 +21,45 @@ exports.getLogin = (req, res, next) => {
 exports.postLogin = (req, res, next) => {
   const email = req.body.email;
   const password = req.body.password;
+  const errors = validationResult(req);
 
-  //copy the user id from user collection (mongodb-compass/atlas) and paste below~
-  User.findOne({ email: email })
-    .then((user) => {
-      if (!user) {
-        req.flash("error", "Invalid Email or Password");
-        return res.redirect("/login");
-      }
+  if (!errors.isEmpty()) {
+    return res.status(422).render("auth/login", {
+      path: "/login",
+      pageTitle: "Login Page",
+      errorMessage: errors.array()[0].msg,
+    });
+  }
 
-      bcrypt
-        .compare(password, user.password)
-        .then((isMatching) => {
-          if (isMatching) {
-            req.session.isLoggedIn = true;
-            req.session.user = user;
-            return req.session.save((err) => {
-              console.log(err);
-              res.redirect("/");
-            });
-          }
-          // if entered wrong password
-          console.log("Wrong password");
-          res.redirect("/login");
-        })
-        .catch((err) => {
-          console.log(err);
-          res.redirect("/login");
-        });
-    })
-    .catch((err) => console.log(err));
+  // //copy the user id from user collection (mongodb-compass/atlas) and paste below~
+  // User.findOne({ email: email })
+  //   .then((user) => {
+  //     if (!user) {
+  //       req.flash("error", "Invalid Email or Password");
+  //       return res.redirect("/login");
+  //     }
+
+  // bcrypt
+  //   .compare(password, User.password)
+  //   .then((isMatching) => {
+  //     if (isMatching) {
+  //       req.session.isLoggedIn = true;
+  //       req.session.user = user;
+  //       return req.session.save((err) => {
+  //         console.log(err);
+  //         res.redirect("/");
+  //       });
+  //     }
+  //     // if entered wrong password
+  //     console.log("Wrong password");
+  //     res.redirect("/login");
+  //   })
+  //   .catch((err) => {
+  //     console.log(err);
+  //     res.redirect("/login");
+  //   });
+  // })
+  // .catch((err) => console.log(err));
 };
 
 exports.postLogout = (req, res, next) => {

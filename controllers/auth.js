@@ -1,5 +1,6 @@
 const User = require("../models/user");
 const bcrypt = require("bcryptjs");
+const { validationResult } = require("express-validator");
 
 exports.getLogin = (req, res, next) => {
   let errMsg = req.flash("error");
@@ -79,32 +80,41 @@ exports.postSignup = (req, res, next) => {
   const name = req.body.name;
   const email = req.body.email;
   const password = req.body.password;
-  const confirmPassword = req.body.confirmPassword;
+  // const confirmPassword = req.body.confirmPassword;
+  const errors = validationResult(req);
 
-  // make use of User model
-  User.findOne({ email: email })
-    .then((userDoc) => {
-      // check first if email already exists in database
-      if (userDoc) {
-        // we want to let the next page know there has been an error
-        req.flash("error", "Email already exists.");
-        return res.redirect("/signup");
-      }
-      bcrypt
-        .hash(password, 12)
-        .then((hashedPassword) => {
-          const user = new User({
-            name: name,
-            email: email,
-            password: hashedPassword,
-            cart: { items: [] },
-          });
-          //mongoose method
-          return user.save();
-        })
-        .then(() => {
-          res.redirect("/login");
-        });
+  if (!errors.isEmpty()) {
+    // console.log("Err", errors.array());
+    return res.status(422).render("auth/signup", {
+      path: "/signup",
+      pageTitle: "Sign Up Page",
+      errorMessage: errors.array()[0].msg,
+    });
+  }
+  // // make use of User model
+  // User.findOne({ email: email })
+  //   .then((userDoc) => {
+  //     // check first if email already exists in database
+  //     if (userDoc) {
+  //       // we want to let the next page know there has been an error
+  //       req.flash("error", "Email already exists.");
+  //       return res.redirect("/signup");
+  //     }
+  bcrypt
+    .hash(password, 12)
+    .then((hashedPassword) => {
+      const user = new User({
+        name: name,
+        email: email,
+        password: hashedPassword,
+        cart: { items: [] },
+      });
+      //mongoose method
+      return user.save();
     })
-    .catch((err) => console.log(err));
+    .then(() => {
+      res.redirect("/login");
+    });
+  // })
+  // .catch((err) => console.log(err));
 };

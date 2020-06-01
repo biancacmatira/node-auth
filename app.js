@@ -8,6 +8,7 @@ const mongoose = require("mongoose");
 const session = require("express-session");
 const MongoDBStore = require("connect-mongodb-session")(session);
 const csrf = require("csurf");
+const flash = require("connect-flash");
 
 const errorController = require("./controllers/error");
 
@@ -39,6 +40,8 @@ app.use(
   })
 );
 app.use(csrfProtection);
+//enables you to use flash inside req
+app.use(flash());
 
 //dummy auth
 app.use((req, res, next) => {
@@ -56,6 +59,7 @@ app.use((req, res, next) => {
 // create new middleware
 app.use((req, res, next) => {
   // creating a variable with locals (special) property(express)
+  // to extract csrfToken() is by res, from client side
   res.locals.csrfToken = req.csrfToken();
   res.locals.isAuth = req.session.isLoggedIn;
   next();

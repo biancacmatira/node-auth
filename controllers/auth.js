@@ -2,11 +2,17 @@ const User = require("../models/user");
 const bcrypt = require("bcryptjs");
 
 exports.getLogin = (req, res, next) => {
-  // console.log(req.session.isLoggedIn);
+  let errMsg = req.flash("error");
+  if (errMsg.length > 0) {
+    errMsg = errMsg[0];
+  } else {
+    errMsg = null;
+  }
   res.render("auth/login", {
     path: "/auth/login",
     pageTitle: "Login Page",
     isAuth: false,
+    errorMessage: errMsg,
   });
 };
 
@@ -19,6 +25,7 @@ exports.postLogin = (req, res, next) => {
   User.findOne({ email: email })
     .then((user) => {
       if (!user) {
+        req.flash("error", "Invalid Email or Password");
         return res.redirect("/login");
       }
 
@@ -53,10 +60,17 @@ exports.postLogout = (req, res, next) => {
 };
 
 exports.getSignup = (req, res, next) => {
+  let errMsg = req.flash("error");
+  if (errMsg.length > 0) {
+    errMsg = errMsg[0];
+  } else {
+    errMsg = null;
+  }
   res.render("auth/signup", {
     path: "/signup",
     pageTitle: "Sign Up Page",
     isAuth: false,
+    errorMessage: errMsg,
   });
 };
 
@@ -72,6 +86,8 @@ exports.postSignup = (req, res, next) => {
     .then((userDoc) => {
       // check first if email already exists in database
       if (userDoc) {
+        // we want to let the next page know there has been an error
+        req.flash("error", "Email already exists.");
         return res.redirect("/signup");
       }
       bcrypt

@@ -27,6 +27,8 @@
             </div>
             ​
             <button class="btn" type="submit">Sign Up</button>
+            <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+
         </form>
     </main>
     <%- include('../includes/end.ejs') %>

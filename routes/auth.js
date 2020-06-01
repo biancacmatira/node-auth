@@ -20,11 +20,11 @@ router.post("/logout", authController.postLogout);
 // @route   GET /signup
 // @desc    User registration
 // @access  Public
-router.get("/signup");
+router.get("/signup", authController.getSignup);
 
 // @route   POST /signup
 // @desc    User registration
 // @access  Public
-router.post("/signup");
+router.post("/signup", authController.postSignup);
 
 module.exports = router;
